@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#SBATCH 
+#SBATCH
+#sBATCH
+
+#SBATCH
+
+#SBATCH
+#SBATCH
+#SBATCH
+
+module load mpich/3.4.1_slurm_intel18
+module load gsl/2.5
+module load hdf5/1.8.20
+
+cd /home/ualaxr001/source_and_ic/cosang_code
+make clean
+make
