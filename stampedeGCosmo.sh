@@ -28,4 +28,4 @@ cd /work2/09034/tg883333/stampede2/CoSANG_22
 
 echo “Start the simulation”
 
-ibrun /work2/09034/tg883333/stampede2/CoSANG_22/P_Gadget3 /work2/09034/tg883333/stampede2/CoSANG_22/gadget.param /work2/09034/tg883333/stampede2/CoSANG_22/sage.par
+ibrun /work2/09034/tg883333/stampede2/CoSANG_22/P-Gadget3 /work2/09034/tg883333/stampede2/CoSANG_22/gadget.param /work2/09034/tg883333/stampede2/CoSANG_22/sage.par
