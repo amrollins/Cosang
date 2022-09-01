@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -N 16 #check nodes for this number
+#SBATCH -N 24 #check nodes for this number
 
 #SBATCH -n 384 #check nodes for this number n/N determines the amount of available memory
 
