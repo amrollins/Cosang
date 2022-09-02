@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH -N 32 #check nodes for this number
+#SBATCH -N 16 #check nodes for this number
 
 #SBATCH -n 384 #check nodes for this number n/N determines the amount of available memory
 
@@ -8,7 +8,7 @@
 
 #SBATCH -e /work2/09034/tg883333/stampede2/GCosmo/gadget.err
 
-#SBATCH -p normal #normal for KNL
+#SBATCH -p skx-normal #normal for KNL
 
 #SBATCH -A TG-PHY200076 #allocation ID
 
