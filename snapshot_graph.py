@@ -14,6 +14,8 @@ print(max(x)-min(x))
 
 plt.scatter(x, y)
 plt.savefig('snap_29_plot.png')
+plt.close()
 
 plt.scatter(x_ic, y_ic)
 plt.savefig('ic_plot.png')
+plt.close()
