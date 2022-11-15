@@ -25,35 +25,60 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math 
 
+gal_coord = [27.5708,29.1913,27.5166] ##hardcoded, make into argument
 f = h5py.File('test_tag.h5', 'r') #opens the file
 f_key = list(f.keys())
 print(f_key) ##shows what keys we have to work with
 
-##gets the data and calculates the values we want
-met = f['Metallicity']
-met_for_calc = np.nan_to_num(np.array(met))
-fixed_met = np.log10(met_for_calc * (10 ** 10) /  (0.015))
-stell_m = f['StellarMass']
-stell_m_for_calc = np.nan_to_num(np.array(stell_m), neginf = 0.0)
-avg_met = np.sum(met_for_calc * stell_m_for_calc) / np.sum(stell_m_for_calc)
-x = f['X']
-x_for_calc = np.nan_to_num(np.array(x))
-y =  f['Y']
-y_for_calc = np.nan_to_num(np.array(y))
-z = f['Z']
-z_for_calc = np.nan_to_num(np.array(z))
-rad = np.sqrt(((x_for_calc) ** 2) + ((y_for_calc) ** 2) + ((z_for_calc) ** 2))
+##gets the data and puts it in the right format
+def make_for_calc(ds, neginf = False, center_val = []):
+    if neginf == True:
+        new = np.nan_to_num(np.array(ds), neginf = 0.0)
+    elif center_val != []:
+        new = new = np.nan_to_num(np.array(ds) - center_val)
+    else:
+        new = np.nan_to_num(np.array(ds))
+    return new
+
+met = make_for_calc(f['Metallicity'])
+stell_m = make_for_calc(f['StellarMass'], neginf = True)
+x = make_for_calc(f['X'], center_val = gal_coord[0])
+y = make_for_calc(f['Y'], center_val = gal_coord[1])
+z = make_for_calc(f['Z'], center_val = gal_coord[2])
+
+new_met = []
+new_stell_m = []
+new_x = []
+new_y = []
+new_z = []
+for i in range(len(met)):
+    if x[i] != 0 and y[i] != 0:
+        new_met.append(met[i])
+        new_stell_m.append(stell_m[i])
+        new_x.append(x[i])
+        new_y.append(y[i])
+        new_z.append(z[i])
+
+met = np.array(new_met)
+stell_m = np.array(new_stell_m)
+x = np.array(new_x)
+y = np.array(new_y)
+z = np.array(new_z)
+
+fixed_met = np.log10(met * (10 ** 10) /  (0.015))
+avg_met = np.sum(met * stell_m) / np.sum(stell_m)
+rad = np.sqrt(((x) ** 2) + ((y) ** 2) + ((z) ** 2))
 rad_kpc = rad * 1000
 
 ##plot of mettalicity as a function of radius
 plt.plot(rad_kpc,fixed_met,'.',markersize=1, c = 'blue')
-m, b = np.polyfit(rad_kpc, fixed_met, 1)
-y_vals = (m * rad_kpc) + b
-plt.plot(rad_kpc, y_vals, c = 'black', linewidth = 100)
+#m, b = np.polyfit(rad_kpc, np.nan_to_num(fixed_met), 1)
+#y_vals = (m * rad_kpc) + b
+#plt.plot(rad_kpc, y_vals, c = 'black', linewidth = 100)
+plt.axis('auto')
 plt.title('Metallicity v. Radius')
 plt.xlabel('Radius [kpc]')
 plt.ylabel('Metallicity [Fe/H]')
-plt.axis('auto')
 plt.show()
 plt.close()
 
@@ -65,8 +90,11 @@ plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
 plt.set_cmap('autumn')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Metallicity v. Radius, Stellar Mass weighted')
-#plt.axis('auto')
-plt.axes(xlim=(45000, 60000), ylim=(0, 10), autoscale_on=False)
+plt.axis('auto')
+#plt.axes(xlim=(45000, 60000), ylim=(0, 10), autoscale_on=False)
 plt.xlabel('Radius [kpc]')
 plt.ylabel('Metallicity [Fe/H]')
 plt.show()
+plt.close()
+
+f.close()
