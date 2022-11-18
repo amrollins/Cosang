@@ -71,9 +71,9 @@ rad_kpc = rad * 1000
 
 ##plot of mettalicity as a function of radius
 plt.plot(rad_kpc,met,'.',markersize=1, c = 'blue')
-#m, b = np.polyfit(rad_kpc, np.nan_to_num(fixed_met), 1)
-#y_vals = (m * rad_kpc) + b
-#plt.plot(rad_kpc, y_vals, c = 'black', linewidth = 100)
+m, b = np.polyfit(rad_kpc, met, 1)
+y_vals = (m * rad_kpc) + b
+plt.plot(rad_kpc, y_vals, c = 'black', linewidth = 100)
 plt.axis('auto')
 plt.title('Metallicity v. Radius')
 plt.xlabel('Radius [kpc]')
