@@ -42,9 +42,9 @@ def make_for_calc(ds, neginf = False, center_val = []):
 
 met = make_for_calc(f['Metallicity'])
 stell_m = make_for_calc(f['StellarMass'], neginf = True)
-x = make_for_calc(f['X'], center_val = gal_coord[0])
-y = make_for_calc(f['Y'], center_val = gal_coord[1])
-z = make_for_calc(f['Z'], center_val = gal_coord[2])
+x = make_for_calc(f['X'], center_val = gal_coord[0] - 1.8383)
+y = make_for_calc(f['Y'], center_val = gal_coord[1] - 1.7024)
+z = make_for_calc(f['Z'], center_val = gal_coord[2] - 4.2)
 
 new_met = []
 new_stell_m = []
@@ -65,13 +65,12 @@ x = np.array(new_x)
 y = np.array(new_y)
 z = np.array(new_z)
 
-fixed_met = np.log10(met * (10 ** 10) /  (0.015))
 avg_met = np.sum(met * stell_m) / np.sum(stell_m)
 rad = np.sqrt(((x) ** 2) + ((y) ** 2) + ((z) ** 2))
 rad_kpc = rad * 1000
 
 ##plot of mettalicity as a function of radius
-plt.plot(rad_kpc,fixed_met,'.',markersize=1, c = 'blue')
+plt.plot(rad_kpc,met,'.',markersize=1, c = 'blue')
 #m, b = np.polyfit(rad_kpc, np.nan_to_num(fixed_met), 1)
 #y_vals = (m * rad_kpc) + b
 #plt.plot(rad_kpc, y_vals, c = 'black', linewidth = 100)
@@ -83,7 +82,7 @@ plt.show()
 plt.close()
 
 ##plot of metallicity weighted by solar mass
-heatmap, xedges, yedges = np.histogram2d(rad_kpc, np.nan_to_num(fixed_met, neginf = 0.0), weights=stell_m_for_calc,bins=50)
+heatmap, xedges, yedges = np.histogram2d(rad_kpc, met, weights=stell_m_for_calc,bins=50)
 extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 plt.clf()
 plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
@@ -91,7 +90,6 @@ plt.set_cmap('autumn')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Metallicity v. Radius, Stellar Mass weighted')
 plt.axis('auto')
-#plt.axes(xlim=(45000, 60000), ylim=(0, 10), autoscale_on=False)
 plt.xlabel('Radius [kpc]')
 plt.ylabel('Metallicity [Fe/H]')
 plt.show()
