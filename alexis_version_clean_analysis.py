@@ -34,17 +34,15 @@ print(f_key) ##shows what keys we have to work with
 def make_for_calc(ds, neginf = False, center_val = []):
     if neginf == True:
         new = np.nan_to_num(np.array(ds), neginf = 0.0)
-    elif center_val != []:
-        new = new = np.nan_to_num(np.array(ds) - center_val)
     else:
         new = np.nan_to_num(np.array(ds))
     return new
 
 met = make_for_calc(f['Metallicity'])
 stell_m = make_for_calc(f['StellarMass'], neginf = True)
-x = make_for_calc(f['X'], center_val = gal_coord[0] - 1.8383)
-y = make_for_calc(f['Y'], center_val = gal_coord[1] - 1.7024)
-z = make_for_calc(f['Z'], center_val = gal_coord[2] - 4.2)
+x = make_for_calc(f['X'])
+y = make_for_calc(f['Y'])
+z = make_for_calc(f['Z'])
 
 new_met = []
 new_stell_m = []
@@ -55,9 +53,9 @@ for i in range(len(met)):
     if x[i] != 0 and y[i] != 0:
         new_met.append(met[i])
         new_stell_m.append(stell_m[i])
-        new_x.append(x[i])
-        new_y.append(y[i])
-        new_z.append(z[i])
+        new_x.append(x[i] - gal_coord[0] - 1.8383)
+        new_y.append(y[i] - gal_coord[1] - 1.7024)
+        new_z.append(z[i] - gal_coord[2] - 4.2)
 
 met = np.array(new_met)
 stell_m = np.array(new_stell_m)
