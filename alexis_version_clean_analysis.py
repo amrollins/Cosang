@@ -24,8 +24,18 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import math 
+import sys
+import os
 
-gal_coord = [27.5708,29.1913,27.5166] ##hardcoded, make into argument, maybe figure out a process to get this
+parser = argparse.ArgumentParser(description = "Inputs of CoSANG Analysis")
+parser.add_argument('--dir', action='store', dest='dir', default='', help='Path to tag files')
+parser.add_argument('--gal_cent', action='store', dest='gal_cent', default=[27.5708,29.1913,27.5166], type=list, help='coordinates of galaxy center, defaults to m12i')
+
+args = parser.parse_args()
+dic_args = vars(args)
+
+
+gal_coord = args.gal_cent ##maybe figure out a process to get this
 list_met = []
 list_x = []
 list_y = []
@@ -33,7 +43,7 @@ list_z = []
 list_stell_m = []
 
 
-for j in args.path: #FIXME, make arguments for path to snapshot files
+for j in args.dir: #FIXME, will this loop?
     f = h5py.File(str(j), 'r') #opens the file
     f_key = list(f.keys())
     print(f_key) ##shows what keys we have to work with
