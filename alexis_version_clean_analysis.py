@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import math 
 import sys
 import os
+import argparse
 
 parser = argparse.ArgumentParser(description = "Inputs of CoSANG Analysis")
 parser.add_argument('--dir', action='store', dest='dir', default='', help='Path to tag files')
