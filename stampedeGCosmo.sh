@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH -N 16 #check nodes for this number
+#SBATCH -N 20 #check nodes for this number
 
-#SBATCH -n 384 #check nodes for this number n/N determines the amount of available memory
+#SBATCH -n 200 #check nodes for this number n/N determines the amount of available memory
 
 #SBATCH -o /work2/09034/tg883333/stampede2/GCosmo/gadget.log
 
@@ -18,6 +18,8 @@
 
 #SBATCH -t 47:00:00 # set maximum run time
 
+export MALLOC_CHECK=1
+
 echo “Loading”
 
 module load TACC intel impi hdf5 gsl fftw2
@@ -27,5 +29,4 @@ export I_MPI_COMPATIBILITY=4
 cd /work2/09034/tg883333/stampede2/CoSANG_22
 
 echo “Start the simulation”
-
 ibrun /work2/09034/tg883333/stampede2/CoSANG_22/P-Gadget3 /work2/09034/tg883333/stampede2/CoSANG_22/gadget.param /work2/09034/tg883333/stampede2/CoSANG_22/sage.par
