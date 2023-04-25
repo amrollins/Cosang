@@ -25,6 +25,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 import glob
+import math
 
 plt.rcParams['agg.path.chunksize'] = 10000
 
@@ -43,7 +44,7 @@ list_y = []
 list_z = []
 list_stell_m = []
 
-def make_for_calc(ds, neginf = False, center_val = []):
+def make_for_calc(ds, neginf = False, center_val = []): ##gets rid of nan values and neginf if necessary
     if neginf == True:
         new = np.nan_to_num(np.array(ds), neginf = 0.0)
     else:
@@ -69,24 +70,25 @@ for h5name in glob.glob(adress): #reads in all of the files in the directory
         if x[i] != 0 and y[i] != 0 and stell_m[i] > 0 and met[i]>0.000000196: ##reasonable metalliciity and stell_m limits
             list_met.append(met[i])
             list_stell_m.append(stell_m[i])
-            list_x.append(x[i] - 29.355671145527047) #correction factors, figure it out
+            list_x.append(x[i] - 29.355671145527047) #correction for where the center of the galaxy is
             list_y.append(y[i] - 31.02505460762871)
             list_z.append(z[i] - 32.4927901257948)
 
-##gal_x = (max(new_x) + min(new_x)) / 2
-##gal_y = (max(new_y) + min(new_y)) / 2
-##gal_z = (max(new_z) + min(new_z)) / 2
-##print("Center coodinate:", gal_x, gal_y, gal_z)
-##for j in range(len(list_met)):
-  ##  list_x.append(new_x[j] - gal_x)
-  ##  list_y.append(new_y[j] - gal_y)
-  ##  list_z.append(new_z[j] - gal_z)
+##this part returns the center galaxy coordinates
+#gal_x = (max(new_x) + min(new_x)) / 2
+#gal_y = (max(new_y) + min(new_y)) / 2
+#gal_z = (max(new_z) + min(new_z)) / 2
+#print("Center coodinate:", gal_x, gal_y, gal_z)
+#for j in range(len(list_met)):
+  #  list_x.append(new_x[j] - gal_x)
+  #  list_y.append(new_y[j] - gal_y)
+  #  list_z.append(new_z[j] - gal_z)
 
 met = np.array(list_met)
 stell_m = np.array(list_stell_m)
 x = np.array(list_x)
 y = np.array(list_y)
-z = np.array(list_z)
+z = np.array(list_z) ##end of putting data into right format
 
 avg_met = np.sum(met * stell_m) / np.sum(stell_m)
 solar_frac_met = np.log10(met / 0.0196) ##makes metallicity in solar fraction 
@@ -100,7 +102,41 @@ y_kpc = y * 1000
 z_kpc = z * 1000
 
 
-##plot of mettalicity as a function of radius
+##makes the radial density profile
+density = []
+rad_kpc_plot = []
+bin_num = 100 
+max_vol = (4/3) * math.pi * (max(rad_kpc) ** 3)
+
+for b in range(bin_num):
+    tot_stell_m = []
+    rad_for_plot = []
+    vol_lim = [((b / bin_num) * max_vol), (((b + 1) / bin_num) * max_vol)]
+    
+    for i in range(len(rad_kpc)):
+        volume = (4/3) * math.pi * (rad_kpc[i] ** 3)
+        
+        if vol_lim[0] < volume < vol_lim[1]:
+            tot_stell_m.append(stell_m[i])
+            rad_for_plot.append(rad_kpc[i])
+            
+    vol_of_shell = vol_lim[1] - vol_lim[0]
+    rad_kpc_plot.append(max(rad_for_plot))
+    density.append(np.log10(sum(tot_stell_m) / vol_of_shell))
+        
+
+plt.plot(rad_kpc_plot, density)
+plt.axis('auto')
+plt.title('radial density profile')
+plt.xlabel('Radius [kpc]')
+plt.ylabel('log10(density [mass/kpc^3])')
+plt.savefig('rad_dens_prof.png')
+plt.close() 
+
+
+#local density in future?
+
+#plot of mettalicity as a function of radius
 plt.plot(rad_kpc, met,'.',markersize=1, c = 'blue')
 m, b = np.polyfit(rad_kpc, met, 1)
 y_vals = (m * rad_kpc) + b
@@ -113,14 +149,14 @@ plt.savefig('rad_v_met.png')
 plt.close()
 
 
-##plot of metallicity weighted by solar mass
+#plot of metallicity weighted by solar mass
 heatmap, xedges, yedges = np.histogram2d(rad_kpc, solar_frac_met, weights=stell_m ,bins=150)
 extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
 f = plt.figure()
 f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
-with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
+with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower') ##doesn't get the wrong answer, just makes the code run
 plt.set_cmap('viridis')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Metallicity v. Radius, Stellar Mass weighted')
@@ -130,7 +166,7 @@ plt.ylabel('Metallicity [log10(fraction of Sun)]')
 plt.savefig('stell_m_weight_rad_v_met.png')
 
 k = 1
-bin_width = max(rad_kpc)/20
+bin_width = max(rad_kpc)/20 
 avg_met_values =[]
 rad_line = []
 met_err = []
@@ -149,6 +185,8 @@ plt.errorbar(rad_line, avg_met_values, yerr=met_err, c='black')
 plt.savefig('stell_m_rad_met_w_avg_line.png')
 plt.close()
 
+
+##large metallicity cuts for a metallicity vs radius graph, weighted by mass
 high_met_x = []
 high_met_y = []
 high_met_z = []
@@ -196,7 +234,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Blues')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Low met, x vs. y, Stellar Mass weighted')
 plt.axis('auto')
@@ -213,7 +251,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Blues')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Low met, x vs. z, Stellar Mass weighted')
 plt.axis('auto')
@@ -229,7 +267,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Greens')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Mid met, x vs. y, Stellar Mass weighted')
 plt.axis('auto')
@@ -245,7 +283,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Greens')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('Mid met, x vs. z, Stellar Mass weighted')
 plt.axis('auto')
@@ -261,7 +299,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Reds')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('High met, x vs. y, Stellar Mass weighted')
 plt.axis('auto')
@@ -277,7 +315,7 @@ f.set_figwidth(9)
 f.set_figheight(9)
 plt.clf()
 with np.errstate(divide='ignore'):plt.imshow(np.log10(heatmap.T), extent=extent, origin='lower')
-plt.set_cmap('viridis')
+plt.set_cmap('Reds')
 plt.colorbar(label='log10(Stellar Mass)')
 plt.title('High met, x vs. z, Stellar Mass weighted')
 plt.axis('auto')
@@ -286,5 +324,6 @@ plt.ylabel('z [kpc]')
 plt.savefig('x_z_high.png')
 plt.close()
 
-print('low met:', min(met), 'one_third:', one_third_met, 'two_third:', two_third_met, 'high_met:', max(met))
+print('low met:', min(met), 'one_third:', one_third_met, 'two_third:', two_third_met, 'high_met:', max(met)) ##twlls me what the metallicity limits are
+
 
