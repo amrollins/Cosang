@@ -89,32 +89,29 @@ y_kpc = y * 1000
 z_kpc = z * 1000
 
 
-num = 20 #number of graphs you want
+num = 100 #number of cuts you want
 k = 1
-#graph_range = [(((k-1) / num) * max(solar_frac_met)), ((k/num) * max(solar_frac_met))]##FIXME something went wrong 
 for i in range(num):
     plot_x = []
     plot_y = []
     plot_z = []
     plot_stell_m = []
-    graph_range = [((k / num) * max(solar_frac_met)), (((k+1)/num) * max(solar_frac_met))]
-    for m in range(len(solar_frac_met)):
-        #print("high:", graph_range[1], "low:", graph_range[0], "value:", solar_frac_met[m])
-        if graph_range[1] < solar_frac_met[m] < graph_range[0]:
+    graph_range = [((k / num) * max(met)), (((k+1)/num) * max(met))] ##define the range of metalicity on a given graph
+    for m in range(len(met)):
+        if graph_range[1] < met[m] < graph_range[0]:
             plot_x.append(x_kpc[m])
-            print('x:', x_kpc[m])
             plot_y.append(y_kpc[m])
             plot_z.append(z_kpc[m])
             plot_stell_m.append(stell_m[m])
-            
-    # if graph_range[0] > 0.0001:
-    #     title_lower = np.log10(graph_range[0]/0.0196)
-    # else:
-    #     title_lower = -2.36967467411
-    # title_upper = np.log10(graph_range[1]/0.0196)
-    title_lower = graph_range[1]
-    title_upper = graph_range[0]
+  
+##title of graphs is in log space
+     if graph_range[0] > 0.0001: 
+         title_lower = np.log10(graph_range[0]/0.0196)
+     else:
+         title_lower = -2.36967467411 ##calculating this was causing problems
+     title_upper = np.log10(graph_range[1]/0.0196)
     
+    ##x y plots
     heatmap, xedges, yedges = np.histogram2d(plot_x, plot_y, weights=plot_stell_m ,bins=150)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     f = plt.figure()
@@ -131,6 +128,7 @@ for i in range(num):
     plt.savefig('x_y_' + str(k) + '.png')
     plt.close()
     
+    ##x z plots
     heatmap, xedges, yedges = np.histogram2d(plot_x, plot_z, weights=plot_stell_m ,bins=150)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     f = plt.figure()
